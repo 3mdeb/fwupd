@@ -249,6 +249,7 @@ if build_daemon
   endif
 endif
 libm = cc.find_library('m', required: false)
+efivar = cc.find_library('efivar', required: false, dirs: '/usr/local')
 libgcab = dependency('libgcab-1.0', version : '>= 1.0', fallback : ['gcab', 'gcab_dep'])
 gcab = find_program('gcab', required : get_option('tests'))
 bashcomp = dependency('bash-completion', required: false)
