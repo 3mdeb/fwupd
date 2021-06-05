@@ -55,7 +55,7 @@ make makesum
 make makeplist > plist
 cat plist
 echo "sed"
-sed -i "1d" plist
+sed -i "" "1d" plist
 cat plist
 make package
 make install
