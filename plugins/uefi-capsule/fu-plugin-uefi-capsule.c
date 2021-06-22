@@ -118,7 +118,6 @@ fu_plugin_add_security_attrs (FuPlugin *plugin, FuSecurityAttrs *attrs)
 	attr = fwupd_security_attr_new (FWUPD_SECURITY_ATTR_ID_UEFI_SECUREBOOT);
 	fwupd_security_attr_set_plugin (attr, fu_plugin_get_name (plugin));
 	fu_security_attrs_append (attrs, attr);
-
 	/* SB not available or disabled */
 	if (!fu_efivar_secure_boot_enabled_full (&error)) {
 		if (g_error_matches (error,
@@ -131,7 +130,6 @@ fu_plugin_add_security_attrs (FuPlugin *plugin, FuSecurityAttrs *attrs)
 		fwupd_security_attr_set_result (attr, FWUPD_SECURITY_ATTR_RESULT_NOT_ENABLED);
 		return;
 	}
-
 	/* success */
 	fwupd_security_attr_add_flag (attr, FWUPD_SECURITY_ATTR_FLAG_SUCCESS);
 	fwupd_security_attr_set_result (attr, FWUPD_SECURITY_ATTR_RESULT_ENABLED);
@@ -537,7 +535,7 @@ fu_plugin_uefi_capsule_coldplug_device (FuPlugin *plugin, FuUefiDevice *dev, GEr
 	/* set vendor ID as the BIOS vendor */
 	if (device_kind != FU_UEFI_DEVICE_KIND_FMP) {
 		const gchar *dmi_vendor;
-		dmi_vendor = fu_context_get_hwid_value (ctx, FU_HWIDS_KEY_BIOS_VENDOR);
+		dmi_vendor = fu_context_get_hwid_value (ctx, FU_HWIDS_KEY_BASEBOARD_MANUFACTURER);
 		if (dmi_vendor != NULL) {
 			g_autofree gchar *vendor_id = g_strdup_printf ("DMI:%s", dmi_vendor);
 			fu_device_add_vendor_id (FU_DEVICE (dev), vendor_id);

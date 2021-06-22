@@ -11,9 +11,9 @@
 
 #include <efivar.h>
 
-#include "fu-common.h"
 #include "fu-efivar-impl.h"
 
+#include "fu-common.h"
 #include "fwupd-error.h"
 
 gboolean
@@ -35,6 +35,8 @@ fu_efivar_delete_impl (const gchar *guid, const gchar *name, GError **error)
 	efi_guid_t guidt;
 	efi_str_to_guid (guid, &guidt);
 
+	if (!fu_efivar_exists_impl(guid, name))
+		return TRUE;
 	if (efi_del_variable (guidt, name) == 0)
 		return TRUE;
 
@@ -50,7 +52,7 @@ fu_efivar_delete_with_glob_impl (const gchar *guid, const gchar *name_glob, GErr
 {
 	efi_guid_t *guidt = NULL;
 	gchar *name = NULL;
-	gboolean rv = FALSE;
+	gboolean rv = TRUE;
 	efi_guid_t guid_to_delete;
 
 	efi_str_to_guid (guid, &guid_to_delete);
@@ -98,8 +100,29 @@ fu_efivar_get_data_impl (const gchar *guid, const gchar *name, guint8 **data,
 			 gsize *data_sz, guint32 *attr, GError **error)
 {
 	efi_guid_t guidt;
+	gboolean success;
+	guint8 *buf;
+	gssize sz = 0;
+
 	efi_str_to_guid (guid, &guidt);
-	return (efi_get_variable (guidt, name, data, data_sz, attr) != 0);
+	success = efi_get_variable (guidt, name, &buf, data_sz, attr) == 1;
+	if (data_sz != NULL)
+		sz = *data_sz;
+	if (success && sz) {
+		g_autofree guint8 *ret_buf = g_malloc0(sz);
+		memcpy(ret_buf, buf, sz);
+		*data = g_steal_pointer(&ret_buf);
+	}
+
+	if (!success) {
+		g_set_error (error,
+			     G_IO_ERROR,
+			     G_IO_ERROR_FAILED,
+			     "failed to read efivar: %s",
+			     name);
+	}
+
+	return success;
 }
 
 
