@@ -1,4 +1,3 @@
-if host_machine.system() != 'freebsd'
 if get_option('plugin_uefi_pk')
 cargs = ['-DG_LOG_DOMAIN="FuPluginUefiPk"']
 
@@ -24,5 +23,4 @@ shared_module('fu_plugin_uefi_pk',
     gnutls,
   ],
 )
-endif
 endif

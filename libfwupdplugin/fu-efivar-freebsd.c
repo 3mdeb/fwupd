@@ -11,9 +11,9 @@
 
 #include <efivar.h>
 
+#include "fu-common.h"
 #include "fu-efivar-impl.h"
 
-#include "fu-common.h"
 #include "fwupd-error.h"
 
 gboolean

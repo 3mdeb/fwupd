@@ -1,4 +1,3 @@
-if host_machine.system() != 'freebsd'
 if get_option('plugin_uefi_capsule')
 cargs = ['-DG_LOG_DOMAIN="FuPluginUefiDbx"']
 
@@ -91,6 +90,5 @@ if get_option('man')
     install: true,
     install_dir: join_paths(mandir, 'man1'),
   )
-endif
 endif
 endif
