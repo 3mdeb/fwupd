@@ -285,7 +285,8 @@ if get_option('default_library') != 'static'
     platform_deps += cc.find_library('shlwapi')
   endif
   if host_machine.system() == 'freebsd'
-    platform_deps += dependency('efivar')
+    platform_deps += cc.find_library('efivar')
+    platform_deps += cc.find_library('geom')
   endif
 endif
 

@@ -537,7 +537,7 @@ fu_plugin_uefi_capsule_coldplug_device (FuPlugin *plugin, FuUefiDevice *dev, GEr
 	/* set vendor ID as the BIOS vendor */
 	if (device_kind != FU_UEFI_DEVICE_KIND_FMP) {
 		const gchar *dmi_vendor;
-		dmi_vendor = fu_context_get_hwid_value (ctx, FU_HWIDS_KEY_BIOS_VENDOR);
+		dmi_vendor = fu_context_get_hwid_value (ctx, FU_HWIDS_KEY_BASEBOARD_MANUFACTURER);
 		if (dmi_vendor != NULL) {
 			g_autofree gchar *vendor_id = g_strdup_printf ("DMI:%s", dmi_vendor);
 			fu_device_add_vendor_id (FU_DEVICE (dev), vendor_id);

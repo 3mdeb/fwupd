@@ -27,7 +27,8 @@ LIB_DEPENDS=	libcurl.so:ftp/curl \
 		libjcat.so:textproc/libjcat \
 		libjson-glib-1.0.so:devel/json-glib \
 		libxmlb.so:textproc/libxmlb \
-		libefiboot.so:devel/gnu-efi
+		libefiboot.so:devel/gnu-efi \
+		libpolkit-gobject-1.so:sysutils/polkit
 
 RUN_DEPENDS=	${LOCALBASE}/libexec/fwupd/efi/fwupdx64.efi:sysutils/fwupd-efi
 
@@ -52,7 +53,7 @@ MESON_ARGS=	-Dgudev=false \
 		-Dplugin_realtek_mst=false \
 		-Dplugin_thunderbolt=false \
 		-Dplugin_tpm=false \
-		-Dpolkit=false \
+		-Dpolkit=true \
 		-Dsystemd=false \
 		-Dtests=false \
 		-Ddocs=gtkdoc \

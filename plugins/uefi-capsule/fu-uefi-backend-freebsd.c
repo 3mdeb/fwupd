@@ -20,6 +20,7 @@
 
 #include <glib/gstdio.h>
 
+#include "fu-kenv.h"
 #include "fu-uefi-common.h"
 #include "fu-uefi-device.h"
 #include "fu-uefi-backend.h"
