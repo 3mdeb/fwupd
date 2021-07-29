@@ -44,7 +44,14 @@ fu_flashrom_internal_device_init (FuFlashromInternalDevice *self)
 static void
 set_fdopss_lock_state (FuDevice *device, GError **error)
 {
-	const guint16 hsfs = flashrom_tuxedo_get_hsfs();
+	const guint16 hsfs;
+	if (!flashrom_ich_get_hsfs (&hsfs)) {
+		g_set_error_literal (error,
+			     G_IO_ERROR,
+			     G_IO_ERROR_FAILED,
+			     "cannot get hsfs");
+		return FALSE;
+	}
 	FuFlashromInternalDevicePrivate *priv =
 		GET_PRIVATE (FU_FLASHROM_INTERNAL_DEVICE (device));
 	if (hsfs & HSFS_FDOPSS) {
