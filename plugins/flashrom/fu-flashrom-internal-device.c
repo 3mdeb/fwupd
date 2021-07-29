@@ -63,7 +63,7 @@ fu_flashrom_internal_device_set_quirk_kv (FuDevice *device,
 				 GError **error)
 {
 	if (g_strcmp0 (key, "FlashromNeedsFdopssUnlock") == 0) {
-		set_fdopss_lock_state (device);
+		set_fdopss_lock_state (device, error);
 		return TRUE;
 	}
 	g_set_error_literal (error,
