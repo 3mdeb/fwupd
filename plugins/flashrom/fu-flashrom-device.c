@@ -189,7 +189,7 @@ static gboolean
 fu_flashrom_device_close (FuDevice *device, GError **error)
 {
 	FuFlashromDevicePrivate *priv = GET_PRIVATE (FU_FLASHROM_DEVICE (device));
-	flashrom_flash_release (priv->flashctx);
+	//flashrom_flash_release (priv->flashctx);
 	flashrom_programmer_shutdown (priv->flashprog);
 	return TRUE;
 }

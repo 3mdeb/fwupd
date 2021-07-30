@@ -59,3 +59,4 @@ Plugin=flashrom
 # DMI reports the size of the BIOS region, flashrom needs the size of the entire SPI flash
 FirmwareSizeMax=0x1000000
 FlashromNeedsFdopssUnlock=true
+

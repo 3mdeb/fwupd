@@ -44,16 +44,21 @@ fu_flashrom_internal_device_init (FuFlashromInternalDevice *self)
 static void
 set_fdopss_lock_state (FuDevice *device, GError **error)
 {
-	const guint16 hsfs;
+	guint16 hsfs;
+	FuFlashromInternalDevicePrivate *priv;
+	struct flashrom_programmer *flashprog;
+
+	flashrom_programmer_init (&flashprog, "internal", NULL);
 	if (!flashrom_ich_get_hsfs (&hsfs)) {
 		g_set_error_literal (error,
 			     G_IO_ERROR,
 			     G_IO_ERROR_FAILED,
 			     "cannot get hsfs");
-		return FALSE;
+		flashrom_programmer_shutdown (flashprog);
+		return;
 	}
-	FuFlashromInternalDevicePrivate *priv =
-		GET_PRIVATE (FU_FLASHROM_INTERNAL_DEVICE (device));
+
+	priv = GET_PRIVATE (FU_FLASHROM_INTERNAL_DEVICE (device));
 	if (hsfs & HSFS_FDOPSS) {
 		fu_device_add_flag (device, FWUPD_DEVICE_FLAG_LOCKED);
 		fu_device_add_flag (device, FWUPD_DEVICE_FLAG_NEEDS_SHUTDOWN);
@@ -61,6 +66,7 @@ set_fdopss_lock_state (FuDevice *device, GError **error)
 	} else if (hsfs > 0) {
 		priv->me_region_flashable = true;
 	}
+	flashrom_programmer_shutdown (flashprog);
 }
 
 static gboolean
