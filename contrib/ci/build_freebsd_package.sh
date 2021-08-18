@@ -57,8 +57,9 @@ sed -i .old "s/DISTVERSION=.*$/DISTVERSION=\t${GITHUB_TAG}/" Makefile
 make makesum
 make clean
 make
-make makeplist > plist
-sed -i "" "1d" plist
+make makeplist > pkg-plist
+sed -i "" "1d" pkg-plist
+make clean
 make package
 make install
 cp /usr/ports/sysutils/fwupd/work/pkg/fwupd*.pkg \
