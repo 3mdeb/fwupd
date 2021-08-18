@@ -59,6 +59,7 @@ make clean
 make
 make makeplist > pkg-plist
 sed -i "" "1d" pkg-plist
+sed -i "" "s/%%PORTDOCS%%%%DOCSDIR%%/%%DOCSDIR%%/g" pkg-plist
 cat pkg-plist
 make clean
 make package
