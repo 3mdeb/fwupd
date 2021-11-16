@@ -175,6 +175,10 @@ fu_security_attr_get_name(FwupdSecurityAttr *attr)
 		 * debugging of Intel processors using the USB3 port */
 		return g_strdup(_("Intel DCI debugger"));
 	}
+	if (g_strcmp0(appstream_id, FWUPD_SECURITY_ATTR_ID_MELTDOWN) == 0) {
+		/* TRANSLATORS: Title: if the Meltdown mitigations are enabled */
+		return g_strdup(_("Meltdown mitigations"));
+	}
 
 	/* we should not get here */
 	return g_strdup(fwupd_security_attr_get_name(attr));

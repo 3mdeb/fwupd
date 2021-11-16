@@ -269,6 +269,14 @@ G_BEGIN_DECLS
  * Since: 1.5.5
  **/
 #define FWUPD_SECURITY_ATTR_ID_UEFI_PK "org.fwupd.hsi.Uefi.Pk"
+/**
+ * FWUPD_SECURITY_ATTR_ID_MELTDOWN:
+ *
+ * Host Security ID attribute for the Meltdown vulnerability
+ *
+ * Since: 1.8.0
+ **/
+#define FWUPD_SECURITY_ATTR_ID_MELTDOWN "org.fwupd.hsi.vulns.Meltdown"
 
 GVariant *
 fwupd_security_attr_to_variant(FwupdSecurityAttr *self);
