@@ -1,7 +1,9 @@
 name: FreeBSD daily Builds
 on:
-  schedule:
-    - cron: "0 0 * * *"
+  push:
+    branches: [ freebsd_ci_fix, main ]
+  pull_request:
+    branches: [ freebsd_ci_fix, main ]
 
 jobs:
   build-freebsd:
