@@ -3070,6 +3070,13 @@ fu_util_switch_branch(FuUtilPrivate *priv, gchar **values, GError **error)
 	return fu_util_prompt_complete(priv->completion_flags, TRUE, error);
 }
 
+static gboolean
+fu_util_clear_history(FuUtilPrivate *priv, gchar **values, GError **error)
+{
+	g_autoptr(FuHistory) history = fu_history_new();
+	return fu_history_remove_all(history, error);
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -3537,6 +3544,12 @@ main(int argc, char *argv[])
 			      /* TRANSLATORS: command description */
 			      _("Switch the firmware branch on the device"),
 			      fu_util_switch_branch);
+	fu_util_cmd_array_add(cmd_array,
+			      "clear-history",
+			      NULL,
+			      /* TRANSLATORS: command description */
+			      _("Erase all firmware update history"),
+			      fu_util_clear_history);
 
 	/* do stuff on ctrl+c */
 	priv->cancellable = g_cancellable_new();
@@ -3560,7 +3573,8 @@ main(int argc, char *argv[])
 		fu_engine_request_set_feature_flags(
 		    priv->request,
 		    FWUPD_FEATURE_FLAG_DETACH_ACTION | FWUPD_FEATURE_FLAG_SWITCH_BRANCH |
-			FWUPD_FEATURE_FLAG_FDE_WARNING | FWUPD_FEATURE_FLAG_UPDATE_ACTION);
+			FWUPD_FEATURE_FLAG_FDE_WARNING | FWUPD_FEATURE_FLAG_UPDATE_ACTION |
+			FWUPD_FEATURE_FLAG_COMMUNITY_TEXT);
 	}
 	fu_progressbar_set_interactive(priv->progressbar, priv->interactive);
 
