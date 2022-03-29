@@ -102,6 +102,22 @@ fu_flashrom_internal_device_prepare(FuDevice *device, FwupdInstallFlags flags, G
 }
 
 static gboolean
+fu_flashrom_has_vboot(FuFlashromDevice *device)
+{
+	struct flashrom_flashctx *flashctx = fu_flashrom_device_get_flashctx(device);
+	gsize flash_size = fu_flashrom_device_get_flash_size(device);
+	struct flashrom_layout *layout;
+
+	if (flashrom_layout_read_fmap_from_rom(&layout, flashctx, 0, flash_size))
+		return FALSE;
+
+	if (flashrom_layout_include_region(layout, "RW_SECTION_A"))
+		return FALSE;
+
+	return TRUE;
+}
+
+static gboolean
 fu_flashrom_internal_device_write_firmware(FuDevice *device,
 					   FuFirmware *firmware,
 					   FuProgress *progress,
@@ -127,21 +143,43 @@ fu_flashrom_internal_device_write_firmware(FuDevice *device,
 
 	buf = g_bytes_get_data(blob_fw, &sz);
 
-	if (flashrom_layout_read_from_ifd(&layout, flashctx, NULL, 0)) {
-		g_set_error_literal(error,
-				    FWUPD_ERROR,
-				    FWUPD_ERROR_READ,
-				    "failed to read layout from Intel ICH descriptor");
-		return FALSE;
-	}
+	if (fu_flashrom_has_vboot(parent)) {
+		g_debug("vboot detected, attempting FMAP path");
+		if (flashrom_layout_read_fmap_from_rom(&layout, flashctx, 0, flash_size)) {
+			g_set_error_literal(error,
+					    FWUPD_ERROR,
+					    FWUPD_ERROR_READ,
+					    "failed to read FMAP from ROM");
+		}
+		g_debug("fmap read");
+		if (flashrom_layout_include_region(layout, "RW_SECTION_A")) {
+			g_set_error_literal(error,
+					    FWUPD_ERROR,
+					    FWUPD_ERROR_NOT_SUPPORTED,
+					    "invalid region name");
+			return FALSE;
+		}
+		g_debug("rw_a included");
+		/* for now, always include both RW sections if present */
+		flashrom_layout_include_region(layout, "RW_SECTION_B");
 
-	/* include bios region for safety reasons */
-	if (flashrom_layout_include_region(layout, "bios")) {
-		g_set_error_literal(error,
-				    FWUPD_ERROR,
-				    FWUPD_ERROR_NOT_SUPPORTED,
-				    "invalid region name");
-		return FALSE;
+	} else {
+		g_debug("vboot not detected, attempting IFD");
+		if (flashrom_layout_read_from_ifd(&layout, flashctx, NULL, 0)) {
+			g_set_error_literal(error,
+					    FWUPD_ERROR,
+					    FWUPD_ERROR_READ,
+					    "failed to read layout from Intel ICH descriptor");
+			return FALSE;
+		}
+		/* include bios region for safety reasons */
+		if (flashrom_layout_include_region(layout, "bios")) {
+			g_set_error_literal(error,
+					    FWUPD_ERROR,
+					    FWUPD_ERROR_NOT_SUPPORTED,
+					    "invalid region name");
+			return FALSE;
+		}
 	}
 
 	/* write region */
