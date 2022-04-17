@@ -17,15 +17,9 @@
 
 #define SELFCHECK_TRUE 1
 
-struct FuPluginData {
-	gboolean me_locked;
-};
-
 static void
 fu_plugin_flashrom_init(FuPlugin *plugin)
 {
-	(void)fu_plugin_alloc_data(plugin, sizeof(FuPluginData));
-
 	fu_plugin_add_rule(plugin, FU_PLUGIN_RULE_METADATA_SOURCE, "linux_lockdown");
 	fu_plugin_add_rule(plugin, FU_PLUGIN_RULE_CONFLICTS, "coreboot"); /* obsoleted */
 	/* for ME lock status */
@@ -150,7 +144,7 @@ fu_plugin_flashrom_device_set_hwids(FuPlugin *plugin, FuDevice *device)
 	}
 }
 
-static FuDevice *
+static gboolean
 fu_plugin_flashrom_add_device(FuPlugin *plugin, FuIfdRegion region, GError **error)
 {
 	FuContext *ctx = fu_plugin_get_context(plugin);
@@ -177,17 +171,17 @@ fu_plugin_flashrom_add_device(FuPlugin *plugin, FuIfdRegion region, GError **err
 	fu_plugin_flashrom_device_set_hwids(plugin, device);
 	fu_plugin_flashrom_device_set_bios_info(plugin, device);
 	if (!fu_device_setup(device, error))
-		return NULL;
+		return FALSE;
 
 	/* success */
 	fu_plugin_device_add(plugin, device);
-	return device;
+	return TRUE;
 }
 
 static void
 fu_plugin_flashrom_device_registered(FuPlugin *plugin, FuDevice *device)
 {
-	FuPluginData *data = fu_plugin_get_data(plugin);
+	GPtrArray *our_devices;
 	const gchar *me_region_str = fu_ifd_region_to_string(FU_IFD_REGION_ME);
 
 	/* we're only interested in a device from intel-spi plugin that corresponds to ME
@@ -197,24 +191,25 @@ fu_plugin_flashrom_device_registered(FuPlugin *plugin, FuDevice *device)
 	if (g_strcmp0(fu_device_get_logical_id(device), me_region_str) != 0)
 		return;
 
-	data->me_locked = fu_device_has_flag(device, FWUPD_DEVICE_FLAG_LOCKED);
+	our_devices = fu_plugin_get_devices(plugin);
+	for (guint i = 0; i < our_devices->len; i++) {
+		FuFlashromDevice *our_device =
+			FU_FLASHROM_DEVICE(g_ptr_array_index(our_devices, i));
+		if (fu_flashrom_device_get_region(our_device) == FU_IFD_REGION_ME) {
+			/* unlock operation requires device to be locked */
+			if (fu_device_has_flag(device, FWUPD_DEVICE_FLAG_LOCKED))
+				fu_device_add_flag(FU_DEVICE(our_device), FWUPD_DEVICE_FLAG_LOCKED);
+		}
+	}
 }
 
 static gboolean
 fu_plugin_flashrom_coldplug(FuPlugin *plugin, GError **error)
 {
-	FuDevice *device;
-	FuPluginData *data = fu_plugin_get_data(plugin);
-
-	device = fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_BIOS, error);
-	if (device == NULL)
+	if (!fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_BIOS, error))
 		return FALSE;
-
-	device = fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_ME, error);
-	if (device == NULL)
+	if (!fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_ME, error))
 		return FALSE;
-	if (data->me_locked)
-		fu_device_add_flag(device, FWUPD_DEVICE_FLAG_LOCKED);
 
 	/* success */
 	return TRUE;
