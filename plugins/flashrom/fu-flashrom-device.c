@@ -19,6 +19,11 @@
  */
 #define FU_FLASHROM_DEVICE_FLAG_RESET_CMOS (1 << 0)
 
+/*
+ * Flag to determine if manual ME unlocking by pressing Fn + M is supported.
+ */
+#define FU_FLASHROM_DEVICE_FLAG_FN_M_ME_UNLOCK (1 << 1)
+
 struct _FuFlashromDevice {
 	FuUdevDevice parent_instance;
 	FuIfdRegion region;
@@ -304,6 +309,9 @@ fu_flashrom_device_init(FuFlashromDevice *self)
 	fu_device_register_private_flag(FU_DEVICE(self),
 					FU_FLASHROM_DEVICE_FLAG_RESET_CMOS,
 					"reset-cmos");
+	fu_device_register_private_flag(FU_DEVICE(self),
+					FU_FLASHROM_DEVICE_FLAG_FN_M_ME_UNLOCK,
+					"fn-m-me-unlock");
 }
 
 static void
@@ -398,4 +406,11 @@ FuIfdRegion
 fu_flashrom_device_get_region(FuFlashromDevice *self)
 {
 	return self->region;
+}
+
+gboolean
+fu_flashrom_device_fn_m_me_unlock(FuFlashromDevice *self)
+{
+	FuDevice *device = FU_DEVICE(self);
+	return fu_device_has_private_flag(device, FU_FLASHROM_DEVICE_FLAG_FN_M_ME_UNLOCK);
 }

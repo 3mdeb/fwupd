@@ -232,24 +232,12 @@ fu_plugin_flashrom_startup(FuPlugin *plugin, GError **error)
 }
 
 static gboolean
-fu_plugin_flashrom_is_tuxedo_laptop(FuDevice *device)
-{
-	/* Tuxedo InifinityBook S14 Gen6 */
-	if (fu_device_has_guid(device, "6c80d85b-d0b6-5ee2-99d4-ec28dd32febd"))
-		return TRUE;
-	/* Tuxedo InifinityBook S15 Gen6 */
-	if (fu_device_has_guid(device, "60f53465-e8fc-5122-b79b-f7b03f063037"))
-		return TRUE;
-	return FALSE;
-}
-
-static gboolean
 fu_plugin_flashrom_unlock(FuPlugin *self, FuDevice *device, GError **error)
 {
 	FuFlashromDevice *flashrom_device = FU_FLASHROM_DEVICE(device);
 
-	if (fu_plugin_flashrom_is_tuxedo_laptop(device) &&
-	    fu_flashrom_device_get_region(flashrom_device) == FU_IFD_REGION_ME) {
+	if (fu_flashrom_device_get_region(flashrom_device) == FU_IFD_REGION_ME &&
+	    fu_flashrom_device_fn_m_me_unlock(flashrom_device)) {
 		g_set_error_literal(error,
 				    FWUPD_ERROR,
 				    FWUPD_ERROR_NOT_SUPPORTED,
@@ -264,7 +252,7 @@ fu_plugin_flashrom_unlock(FuPlugin *self, FuDevice *device, GError **error)
 		    FWUPD_ERROR,
 		    FWUPD_ERROR_NOT_SUPPORTED,
 		    "Unlocking of device %s is not supported",
-		    fu_device_get_name(FU_DEVICE(device)));
+		    fu_device_get_name(device));
 	return FALSE;
 }
 
