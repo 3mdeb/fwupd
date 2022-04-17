@@ -151,12 +151,14 @@ fu_plugin_flashrom_add_device(FuPlugin *plugin, FuIfdRegion region, GError **err
 	const gchar *dmi_vendor;
 	const gchar *product = fu_context_get_hwid_value(ctx, FU_HWIDS_KEY_PRODUCT_NAME);
 	const gchar *vendor = fu_context_get_hwid_value(ctx, FU_HWIDS_KEY_MANUFACTURER);
+	const gchar *region_str = fu_ifd_region_to_string(region);
+	g_autofree gchar *name = g_strdup_printf("%s (%s)", product, region_str);
 	g_autoptr(FuDevice) device = fu_flashrom_device_new(ctx, region);
 
-	fu_device_set_name(device, product);
+	fu_device_set_name(device, name);
 	fu_device_set_vendor(device, vendor);
 
-	fu_device_add_instance_str(device, "REGION", fu_ifd_region_to_string(region));
+	fu_device_add_instance_str(device, "REGION", region_str);
 	fu_device_add_instance_str(device, "VENDOR", vendor);
 	fu_device_add_instance_str(device, "PRODUCT", product);
 	fu_device_build_instance_id(device, NULL, "FLASHROM", "VENDOR", "PRODUCT", "REGION", NULL);
