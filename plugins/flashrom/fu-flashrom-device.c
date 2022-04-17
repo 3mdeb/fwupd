@@ -393,3 +393,9 @@ fu_flashrom_device_new(FuContext *ctx, FuIfdRegion region)
 	return FU_DEVICE(
 	    g_object_new(FU_TYPE_FLASHROM_DEVICE, "context", ctx, "region", region, NULL));
 }
+
+FuIfdRegion
+fu_flashrom_device_get_region(FuFlashromDevice *self)
+{
+	return self->region;
+}

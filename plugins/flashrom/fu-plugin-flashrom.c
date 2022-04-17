@@ -150,7 +150,7 @@ fu_plugin_flashrom_device_set_hwids(FuPlugin *plugin, FuDevice *device)
 	}
 }
 
-static gboolean
+static FuDevice *
 fu_plugin_flashrom_add_device(FuPlugin *plugin, FuIfdRegion region, GError **error)
 {
 	FuContext *ctx = fu_plugin_get_context(plugin);
@@ -177,11 +177,11 @@ fu_plugin_flashrom_add_device(FuPlugin *plugin, FuIfdRegion region, GError **err
 	fu_plugin_flashrom_device_set_hwids(plugin, device);
 	fu_plugin_flashrom_device_set_bios_info(plugin, device);
 	if (!fu_device_setup(device, error))
-		return FALSE;
+		return NULL;
 
 	/* success */
 	fu_plugin_device_add(plugin, device);
-	return TRUE;
+	return device;
 }
 
 static void
@@ -203,15 +203,18 @@ fu_plugin_flashrom_device_registered(FuPlugin *plugin, FuDevice *device)
 static gboolean
 fu_plugin_flashrom_coldplug(FuPlugin *plugin, GError **error)
 {
+	FuDevice *device;
 	FuPluginData *data = fu_plugin_get_data(plugin);
 
-	if (!fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_BIOS, error))
+	device = fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_BIOS, error);
+	if (device == NULL)
 		return FALSE;
 
-	if (!data->me_locked) {
-		if (!fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_ME, error))
-			return FALSE;
-	}
+	device = fu_plugin_flashrom_add_device(plugin, FU_IFD_REGION_ME, error);
+	if (device == NULL)
+		return FALSE;
+	if (data->me_locked)
+		fu_device_add_flag(device, FWUPD_DEVICE_FLAG_LOCKED);
 
 	/* success */
 	return TRUE;
@@ -231,6 +234,43 @@ fu_plugin_flashrom_startup(FuPlugin *plugin, GError **error)
 	return TRUE;
 }
 
+static gboolean
+fu_plugin_flashrom_is_tuxedo_laptop(FuDevice *device)
+{
+	/* Tuxedo InifinityBook S14 Gen6 */
+	if (fu_device_has_guid(device, "6c80d85b-d0b6-5ee2-99d4-ec28dd32febd"))
+		return TRUE;
+	/* Tuxedo InifinityBook S15 Gen6 */
+	if (fu_device_has_guid(device, "60f53465-e8fc-5122-b79b-f7b03f063037"))
+		return TRUE;
+	return FALSE;
+}
+
+static gboolean
+fu_plugin_flashrom_unlock(FuPlugin *self, FuDevice *device, GError **error)
+{
+	FuFlashromDevice *flashrom_device = FU_FLASHROM_DEVICE(device);
+
+	if (fu_plugin_flashrom_is_tuxedo_laptop(device) &&
+	    fu_flashrom_device_get_region(flashrom_device) == FU_IFD_REGION_ME) {
+		g_set_error_literal(error,
+				    FWUPD_ERROR,
+				    FWUPD_ERROR_NOT_SUPPORTED,
+				    "ME region on Tuxedo laptops should be unlocked manually:\n"
+				    " 1. Power off your laptop\n"
+				    " 2. Press and keep holding Fn + M during the next step\n"
+				    " 3. Press power on button");
+		return FALSE;
+	}
+
+	g_set_error(error,
+		    FWUPD_ERROR,
+		    FWUPD_ERROR_NOT_SUPPORTED,
+		    "Unlocking of device %s is not supported",
+		    fu_device_get_name(FU_DEVICE(device)));
+	return FALSE;
+}
+
 void
 fu_plugin_init_vfuncs(FuPluginVfuncs *vfuncs)
 {
@@ -239,4 +279,5 @@ fu_plugin_init_vfuncs(FuPluginVfuncs *vfuncs)
 	vfuncs->device_registered = fu_plugin_flashrom_device_registered;
 	vfuncs->startup = fu_plugin_flashrom_startup;
 	vfuncs->coldplug = fu_plugin_flashrom_coldplug;
+	vfuncs->unlock = fu_plugin_flashrom_unlock;
 }
