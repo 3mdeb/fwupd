@@ -37,10 +37,8 @@ class FwupdHeads:
             self.heads_version = None
             hwids = self.dom0_hwids_info.split("\n")
             for line in hwids:
-                if line.startswith("BiosVersion: CBET4000 "):
-                    self.heads_version = line.replace(
-                        "BiosVersion: CBET4000 ", ""
-                    ).replace(" heads", "")
+                if "Heads" in line:
+                    self.heads_version = line.split("Heads-v")[1]
         else:
             print("Device is not running under the heads firmware!!")
             print("Exiting...")
