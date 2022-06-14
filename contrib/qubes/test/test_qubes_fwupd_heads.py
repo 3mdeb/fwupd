@@ -36,7 +36,6 @@ class TestQubesFwupdHeads(unittest.TestCase):
 
     @unittest.skipUnless("qubes" in platform.release(), "Requires Qubes OS")
     def test_get_hwids(self):
-        self.q._check_fwupdtool_version()
         self.q._get_hwids()
         self.assertNotEqual(self.q.dom0_hwids_info, "")
 
@@ -70,7 +69,7 @@ class TestQubesFwupdHeads(unittest.TestCase):
             "https://fwupd.org/downloads/e747a435bf24fd6081b77b6704b39cec5fa2dcf62e0ca6b86d8a6460121a1d07-heads_coreboot_x230-v0_2_3.cab",
         )
         self.assertEqual(
-            self.q.heads_update_sha, "1a54e69ca2b58d1218035115d481480eaf4c66e4"
+            self.q.heads_update_sha, "ba519a7a5d8136c8ade0cf0c775c58f3165f42798ff631c3f57f075897ef1586"
         )
         self.assertEqual(self.q.heads_update_version, "0.2.3")
 
@@ -90,7 +89,7 @@ class TestQubesFwupdHeads(unittest.TestCase):
             "https://fwupd.org/downloads/e747a435bf24fd6081b77b6704b39cec5fa2dcf62e0ca6b86d8a6460121a1d07-heads_coreboot_x230-v0_2_3.cab",
         )
         self.assertEqual(
-            self.q.heads_update_sha, "1a54e69ca2b58d1218035115d481480eaf4c66e4"
+            self.q.heads_update_sha, "ba519a7a5d8136c8ade0cf0c775c58f3165f42798ff631c3f57f075897ef1586"
         )
         self.assertEqual(self.q.heads_update_version, "0.2.3")
 
@@ -98,7 +97,7 @@ class TestQubesFwupdHeads(unittest.TestCase):
     def test_copy_heads_firmware(self):
         qmgr = self.qfwupd.QubesFwupdmgr()
         self.q.heads_update_url = "https://fwupd.org/downloads/e747a435bf24fd6081b77b6704b39cec5fa2dcf62e0ca6b86d8a6460121a1d07-heads_coreboot_x230-v0_2_3.cab"
-        self.q.heads_update_sha = "1a54e69ca2b58d1218035115d481480eaf4c66e4"
+        self.q.heads_update_sha = "ba519a7a5d8136c8ade0cf0c775c58f3165f42798ff631c3f57f075897ef1586"
         self.q.heads_update_version = "0.2.3"
         qmgr._download_firmware_updates(
             self.q.heads_update_url, self.q.heads_update_sha
