@@ -90,9 +90,12 @@ jobs:
           echo $GITHUB_WORKSPACE
           docker run --privileged -e CI=true -e QUBES=true -t -v $GITHUB_WORKSPACE:/github/workspace docker.pkg.github.com/fwupd/fwupd/fwupd-${{matrix.os}}:latest
       - name: Upload fwupd binary artifacts
-        run: |
-          pwd
-          ls
+        uses: actions/upload-artifact@v3
+        with:
+          name: Binary package
+          path: |
+            dist/fwupd-qubes-*.rpm
+            fwupd-qubes-*.deb
 
   macos:
     strategy:
