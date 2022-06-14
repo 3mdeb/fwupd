@@ -33,7 +33,7 @@ class FwupdHeads:
         """
         Checks if Qubes works under heads
         """
-        if "heads" in self.dom0_hwids_info:
+        if "Heads" in self.dom0_hwids_info:
             self.heads_version = None
             hwids = self.dom0_hwids_info.split("\n")
             for line in hwids:
