@@ -1,5 +1,7 @@
 name: FreeBSD daily Builds
 on:
+  push:
+    branches: [ 3mdeb/freebsd-ci-fix ]
   schedule:
     - cron: "0 0 * * *"
 
