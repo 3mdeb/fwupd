@@ -1,7 +1,7 @@
 name: Continuous Integration
 on:
   push:
-    branches: [ main ]
+    branches: [ main, wip/3mdeb/qubes-fwupd-ci ]
   pull_request:
     branches: [ main ]
 
@@ -22,20 +22,6 @@ jobs:
           source venv/bin/activate
           sed -i "/no-commit-to-branch/,+1d" .pre-commit-config.yaml
           pre-commit run --hook-stage commit --all-files
-  abi:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-      - name: Refresh dependencies
-        run: sudo apt update
-      - name: Install dependencies
-        run: |
-          sudo ./contrib/ci/fwupd_setup_helpers.py install-dependencies -o ubuntu --yes
-          python3 -m pip install --user "meson >= 0.60.0"
-      - name: Check ABI
-        run: ./contrib/ci/check-abi $(git describe --abbrev=0 --tags) $(git rev-parse HEAD)
 
   openbmc:
     runs-on: ubuntu-20.04
