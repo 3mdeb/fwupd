@@ -46,6 +46,7 @@ FWUPD_DOM0_METADATA_JCAT = os.path.join(FWUPD_DOM0_METADATA_DIR, "firmware.xml.g
 FWUPD_DOWNLOAD_PREFIX = "https://fwupd.org/downloads/"
 
 FWUPDMGR = "/bin/fwupdmgr"
+FWUPDAGENT = "/bin/fwupdagent"
 
 BIOS_UPDATE_FLAG = os.path.join(FWUPD_DOM0_DIR, "bios_update")
 LVFS_TESTING_DOM0_FLAG = os.path.join(FWUPD_DOM0_DIR, "lvfs_testing")
@@ -128,8 +129,8 @@ class QubesFwupdmgr(FwupdHeads, FwupdUpdate, FwupdReceiveUpdates):
             raise Exception("Manual metadata refresh failed!!!")
 
     def _get_dom0_updates(self):
-        """Gathers information about available updates."""
-        cmd_get_dom0_updates = [FWUPDMGR, "--json", "get-updates"]
+        """Gathers infromations about available updates."""
+        cmd_get_dom0_updates = [FWUPDAGENT, "get-updates"]
         p = subprocess.Popen(cmd_get_dom0_updates, stdout=subprocess.PIPE)
         self.dom0_updates_info = p.communicate()[0].decode()
         if p.returncode != 0 and p.returncode != 2:
@@ -301,7 +302,7 @@ class QubesFwupdmgr(FwupdHeads, FwupdUpdate, FwupdReceiveUpdates):
 
     def _get_dom0_devices(self):
         """Gathers information about devices connected in dom0."""
-        cmd_get_dom0_devices = [FWUPDMGR, "--json", "get-devices"]
+        cmd_get_dom0_devices = [FWUPDAGENT, "get-devices"]
         p = subprocess.Popen(cmd_get_dom0_devices, stdout=subprocess.PIPE)
         self.dom0_devices_info = p.communicate()[0].decode()
         if p.returncode != 0:
