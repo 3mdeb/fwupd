@@ -211,11 +211,13 @@ fu_ifd_firmware_parse(FuFirmware *firmware,
 		priv->num_regions = 10;
 
 	/*
-	 * Choose master layout based on number of regions parsed from the descriptor:
-	 * - Old layout (pre-Skylake) used 5/7 regions and different bit positions.
-	 * - New layout (Skylake+) uses 10 or more regions and the split ext/read/write fields.
+	 * The number-of-regions field is only 3 bits wide (max 7, with 0 meaning 10),
+	 * so it cannot be used to distinguish the legacy (pre-Skylake) FLMSTR layout
+	 * from the new (Skylake+) split ext/read/write layout. fwupd has always parsed
+	 * descriptors using the new layout, so keep doing that to avoid misreading the
+	 * access bits (which would wrongly flag regions as host-writable).
 	 */
-	priv->new_layout = priv->num_regions >= 10;
+	priv->new_layout = TRUE;
 	priv->num_components = (priv->descriptor_map0 >> 8) & 0b11;
 	priv->flash_component_base_addr = (priv->descriptor_map0 << 4) & 0x00000FF0;
 	priv->flash_region_base_addr = (priv->descriptor_map0 >> 12) & 0x00000FF0;
